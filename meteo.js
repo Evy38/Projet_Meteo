@@ -1,26 +1,28 @@
-const apiKey = '44c29caaf779f2956604130c3b58fa03'; // Remplace par ta clé API (ex: OpenWeather)
-const configUrl = 'conf.json';
+let meteo = {
+    apiKey: 'b9aca27f359944767bc5c24e6b2f3039',
 
-async function fetchConfig() {
-    const response = await fetch(configUrl);
-    return response.json();
-}
+    // Fonction pour récupérer les données météo d'une ville
+    recupMeteo: function (ville) {
+        fetch("https://api.openweathermap.org/data/2.5/weather?q=grenoble&units=metric&appid=b9aca27f359944767bc5c24e6b2f3039" 
+           )
+        .then((reponse) => reponse.json())
+        .then((donnee) => this.afficherMeteo(donnee))
+        .catch((error) => console.error("Erreur de récupération des données :", error));
+    },
 
-async function fetchWeather(ville) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=${apiKey}&units=metric&lang=fr`;
-    const response = await fetch(url);
-    return response.json();
-}
+    // Fonction pour afficher les données météo sur la page
+    afficherMeteo: function (donnee) {
+        const { name } = donnee;
+        const { icon, description } = donnee.weather[0];
+        const { temp, humidity } = donnee.main;
 
-async function displayWeather() {
-    const config = await fetchConfig();
-    const weather = await fetchWeather(config.ville);
+        document.querySelector(".ville").innerText = "Temps qu'il fait dans l' " + name;
+        document.querySelector(".icone").src = "https://openweathermap.org/img/wn/" + icon + ".png";
+        document.querySelector(".description").innerText = description;
+        document.querySelector(".temps").innerText = temp + "°C";
+        document.querySelector(".humidite").innerText = "Humidité: " + humidity + "%";
+    }
+};
 
-    document.getElementById('city-name').textContent = config.ville;
-    document.getElementById('temperature').textContent = `Température : ${weather.main.temp}°C`;
-    document.getElementById('description').textContent = `Conditions : ${weather.weather[0].description}`;
-}
-
-// Mise à jour toutes les heures (3600000 ms)
-displayWeather();
-setInterval(displayWeather, 3600000);
+// Appel de la méthode pour récupérer la météo de Grenoble au chargement de la page
+meteo.recupMeteo("Grenoble");
